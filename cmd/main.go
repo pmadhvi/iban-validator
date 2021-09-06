@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
+	"os/signal"
 	"syscall"
 
+	"github.com/joho/godotenv"
 	"github.com/pmadhvi/iban-validator/handlers"
 	"github.com/sirupsen/logrus"
 )
@@ -15,21 +16,40 @@ func main() {
 	var log = logrus.New()
 	log.SetOutput(os.Stdout)
 
+	//Read .env file for env variables
+	err := godotenv.Load()
+	if err != nil {
+		log.Error("Error loading .env file")
+	}
 	// read the port from env variable
-	port, ok := syscall.Getenv("port")
+	port, ok := syscall.Getenv("PORT")
 	if !ok {
 		log.Info("port env variable not set, so using default port 8080")
 		port = "8080"
 	}
 
 	// setup router
-	router := handlers.Router{
-		Log: log,
+	server := handlers.Server{
+		Log:  log,
+		Port: port,
 	}
 
-	// setup all the routes
-	http.Handle("/", router.Routes())
+	errorChan := make(chan error)
 
-	// start the server on specified port
-	log.Fatalf("server failed to start: %v", http.ListenAndServe(fmt.Sprintf(":%s", port), nil))
+	// setup all the routes and start the server
+	go func() {
+		errorChan <- server.Start()
+	}()
+
+	go func() {
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		errorChan <- fmt.Errorf("Got quit signal: %s", <-quit)
+	}()
+
+	if err := <-errorChan; err != nil {
+		log.Error(err)
+		os.Exit(1)
+	}
+
 }

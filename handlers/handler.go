@@ -1,39 +1,58 @@
 package handlers
 
 import (
+	"encoding/json"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/pmadhvi/iban-validator/validator"
+	log "github.com/sirupsen/logrus"
 )
 
-func validateIban(rw http.ResponseWriter, req *http.Request) {
-	// read iban from request url
-	iban := req.URL.Query().Get("iban")
+// Response is for returning the response of validation test
+type Response struct {
+	Message string `json:"message"`
+}
 
-	err := validator.IbanValidator(iban)
+// ValidateIbanHandler is an httphandler to handle request to validate iban
+func ValidateIbanHandler(rw http.ResponseWriter, req *http.Request) {
+	// Feteching the quary parameters from request url
+	vars := mux.Vars(req)
+	iban := vars["iban"]
+
+	err := validator.IbanValidation(iban)
 	if err != nil {
-		respondSuccessJSON(rw, []byte(`{"message": "iban is invalid"}`))
+		errMsg := Response{
+			Message: err.Error(),
+		}
+		log.Errorf("Error response: %v", errMsg)
+		respondErrorJSON(rw, 200, errMsg)
+		return
 	}
-	respondSuccessJSON(rw, []byte(`{"message": "iban is valid"}`))
+	respMsg := Response{
+		Message: "Iban is valid.",
+	}
+	log.Infof("Success response: %v", respMsg)
+	respondSuccessJSON(rw, respMsg)
 }
 
-func checkHealth(rw http.ResponseWriter, req *http.Request) {
-	respondSuccessJSON(rw, []byte(`{"message": "alive"}`))
+// CheckHealthHandler is an httphandler to handle request to check application health
+func CheckHealthHandler(rw http.ResponseWriter, req *http.Request) {
+	respMsg := Response{
+		Message: "Iban Validator application is alive.",
+	}
+	log.Infof("Health check response: %v", respMsg)
+	respondSuccessJSON(rw, respMsg)
 }
 
-func InternalServerwrror(rw http.ResponseWriter, req *http.Request) {
-	errMsg := []byte(`{"error_message": "server is down"}`)
-	respondErrorJSON(rw, http.StatusInternalServerError, errMsg)
+func respondSuccessJSON(rw http.ResponseWriter, response interface{}) {
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(http.StatusOK)
+	json.NewEncoder(rw).Encode(response)
 }
 
-func respondSuccessJSON(rw http.ResponseWriter, response []byte) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(response))
-}
-
-func respondErrorJSON(rw http.ResponseWriter, errorCode int, errorMsg []byte) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(errorCode)
-	w.Write([]byte(errorMsg))
+func respondErrorJSON(rw http.ResponseWriter, errorCode int, errorMsg interface{}) {
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(errorCode)
+	json.NewEncoder(rw).Encode(errorMsg)
 }

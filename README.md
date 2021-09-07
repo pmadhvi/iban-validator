@@ -20,6 +20,8 @@ The URLS the application supports :
 * [Health](http://localhost:9000/api/iban/validate/health) 
 * [ValidateIban](http://localhost:9000//api/iban/validate/{iban})
 
+Note: Port is 8080 when using docker, else port is set to 9000 in .env file(when port cannot be accessed from env file, then default port is 8080).
+
 ## Application has:
 
 - Go 1.16
@@ -70,3 +72,6 @@ The URLS the application supports :
     curl http://localhost:8080/api/iban/validate/health
     curl http://localhost:8080/api/iban/validate/BA391290079401028494
 ```
+
+## Iban Validation Reference: 
+https://www.morfoedro.it/doc.php?n=219&lang=en#:~:text=The%20IBAN%20must%20have%20a,digits%20from%200%20to%209.

@@ -9,14 +9,15 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Response is for returning the response of validation test
+// Response for returning the response of validation test
 type Response struct {
 	Message string `json:"message"`
 }
 
 // ValidateIbanHandler is an httphandler to handle request to validate iban
 func ValidateIbanHandler(rw http.ResponseWriter, req *http.Request) {
-	// Feteching the quary parameters from request url
+
+	// feteching the quary parameters from request url
 	vars := mux.Vars(req)
 	iban := vars["iban"]
 

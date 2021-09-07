@@ -1,5 +1,7 @@
 package validator
 
+// convertedNumber is map of character with their corresponding numeric value
+// this is used when calculating checksum of iban
 var convertedNumber = map[rune]string{
 	'0': "0",
 	'1': "1",

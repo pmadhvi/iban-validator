@@ -13,11 +13,12 @@ type Server struct {
 	Port string
 }
 
-//  Defines routes and their handlers and start the server
+//  defines routes and their handlers and start the server
 func (s Server) Start() error {
 	// Initialize mux router
 	router := mux.NewRouter()
-	// Define routes and call their handler function
+
+	// define routes and call their handler function
 	router.HandleFunc("/api/iban/validate/health", CheckHealthHandler)
 	router.HandleFunc("/api/iban/validate/{iban}", ValidateIbanHandler)
 

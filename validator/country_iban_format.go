@@ -4,6 +4,8 @@ import (
 	"regexp"
 )
 
+// countryIbanFormats is map of 2-digit countrycode with their corresponding iban regex pattern to match aginst
+// this is used for validating the iban for a country
 var countryIbanFormats = map[string]*regexp.Regexp{
 	"AE": regexp.MustCompile("^AE[0-9]{2}[0-9]{3}[0-9]{16}$"),                      //UAE
 	"AT": regexp.MustCompile("^AT[0-9]{2}[0-9]{5}[0-9]{11}$"),                      //Austria
